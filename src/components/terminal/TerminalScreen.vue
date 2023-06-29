@@ -119,7 +119,7 @@ function setUpConnectionWithServer() {
   };
 
   socket.onerror = function(error) {
-    alert(`[error]`);
+    console.log(error);
   };
 }
 
