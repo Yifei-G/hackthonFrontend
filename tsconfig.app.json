@@ -1,0 +1,17 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue", "src/**/*.ts"],
+  "exclude": ["src/**/__tests__/*"],
+  "compilerOptions": {
+    "strictPropertyInitialization": false,
+    "composite": true,
+    "baseUrl": ".",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "@components": ["./src/components/index.ts"],
+      "@models": ["./src/models/index.ts"],
+      "@utils": ["./src/utils/index.ts"],
+    }
+  }
+}

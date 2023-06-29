@@ -1,120 +1,206 @@
 <template src="./TerminalScreen.html"></template>
-<style scoped> @import './TerminalScreen.css'; </style>
-<script>
+<style scoped>
+@import './TerminalScreen.css';
+</style>
+<script lang="ts" setup>
+import { ref, onMounted, type Ref } from 'vue';
 import axios from 'axios';
-export default {
-  name: "TerminalScreen",
-  data() {
-    return {
-      lastAnimatedMessageIndex: 0,
-      terminalContainer: null,
-      socket: null,
-      displayMessages: [],
-      matrix_characters: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
-      messages: [
-        {content: "MATRIX", charPosition: []},
-      ],
-    };
-  },
-  mounted() {
-    this.terminalContainer = this.$refs.terminalContainer;
-    this.setUpConnectionWithServer();
-    this.setUpCanvas();
-    this.animateMessagesLikeMatrix();
-  },
+import { MessageModel } from '@models';
+import { hasValue } from '@utils';
+const canvas: Ref<HTMLCanvasElement | undefined> = ref();
+const terminalContainer = ref();
+let canvasObject: HTMLCanvasElement | undefined;
+let ctx: CanvasRenderingContext2D | undefined | null;
+const matrix_characters: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+const colorSchema: string[] = ['#cefbe4', '#81ec72', '#5cd646', '#54d13c', '#4ccc32', '#43c728'];
+let messages: MessageModel[] = [
+  // { content: 'Sergio es un capullo', charPosition: [] },
+  // { content: 'Alex el mejor', charPosition: [] },
+  // { content: 'Ivan perdedor', charPosition: [] },
+  // { content: 'Promociones ya!', charPosition: [] },
+  // { content: 'jajjajajajaja kaka', charPosition: [] },
+  // { content: 'pelele :P', charPosition: [] },
+  // { content: 'Sergio es un capullo', charPosition: [] },
+  // { content: 'Alex el mejor', charPosition: [] },
+  // { content: 'Ivan perdedor', charPosition: [] },
+  // { content: 'Promociones ya!', charPosition: [] },
+  // { content: 'jajjajajajaja kaka', charPosition: [] },
+  // { content: 'pelele :P', charPosition: [] },
+  // { content: 'Sergio es un capullo', charPosition: [] },
+  // { content: 'Alex el mejor', charPosition: [] },
+  // { content: 'Ivan perdedor', charPosition: [] },
+  // { content: 'Promociones ya!', charPosition: [] },
+  // { content: 'jajjajajajaja kaka', charPosition: [] },
+  // { content: 'pelele :P', charPosition: [] },
+  // { content: 'Sergio es un capullo', charPosition: [] },
+  // { content: 'Alex el mejor', charPosition: [] },
+  // { content: 'Ivan perdedor', charPosition: [] },
+  // { content: 'Promociones ya!', charPosition: [] },
+  // { content: 'jajjajajajaja kaka', charPosition: [] },
+  // { content: 'pelele :P', charPosition: [] },
+  // { content: 'Sergio es un capullo', charPosition: [] },
+  // { content: 'Alex el mejor', charPosition: [] },
+  // { content: 'Ivan perdedor', charPosition: [] },
+  // { content: 'Promociones ya!', charPosition: [] },
+  // { content: 'jajjajajajaja kaka', charPosition: [] },
+  // { content: 'pelele :P', charPosition: [] },
+  // { content: 'Sergio es un capullo', charPosition: [] },
+  // { content: 'Alex el mejor', charPosition: [] },
+  // { content: 'Ivan perdedor', charPosition: [] },
+  // { content: 'Promociones ya!', charPosition: [] },
+  // { content: 'jajjajajajaja kaka', charPosition: [] },
+  // { content: 'pelele :P', charPosition: [] },
+  // { content: 'Sergio es un capullo', charPosition: [] },
+  // { content: 'Alex el mejor', charPosition: [] },
+  // { content: 'Ivan perdedor', charPosition: [] },
+  // { content: 'Promociones ya!', charPosition: [] },
+  // { content: 'jajjajajajaja kaka', charPosition: [] },
+  // { content: 'pelele :P', charPosition: [] },
+  // { content: 'Sergio es un capullo', charPosition: [] },
+  // { content: 'Alex el mejor', charPosition: [] },
+  // { content: 'Ivan perdedor', charPosition: [] },
+  // { content: 'Promociones ya!', charPosition: [] },
+  // { content: 'jajjajajajaja kaka', charPosition: [] },
+  // { content: 'pelele :P', charPosition: [] },
+  // { content: 'Sergio es un capullo', charPosition: [] },
+  // { content: 'Alex el mejor', charPosition: [] },
+  // { content: 'Ivan perdedor', charPosition: [] },
+  // { content: 'Promociones ya!', charPosition: [] },
+  // { content: 'jajjajajajaja kaka', charPosition: [] },
+  // { content: 'pelele :P', charPosition: [] },
+  // { content: 'Sergio es un capullo', charPosition: [] },
+  // { content: 'Alex el mejor', charPosition: [] },
+  // { content: 'Ivan perdedor', charPosition: [] },
+  // { content: 'Promociones ya!', charPosition: [] },
+  // { content: 'jajjajajajaja kaka', charPosition: [] },
+  // { content: 'pelele :P', charPosition: [] }
+]
 
-  async created() {
+let arrayX = new Array();
+let arrayY = new Array();
+let dY = new Array();
 
-  },
+for (var i = 0; i < messages.length; i++) {
+  arrayX[i] = Math.floor(Math.random() * 1265);
+  arrayY[i] = -100;
+  dY[i] = Math.floor(Math.random() * 7) + 3;
+}
 
-  methods: {
+onMounted(() => {
+  canvasObject = canvas.value
+  setUpConnectionWithServer();
+  setUpCanvas();
+  animateMessagesLikeMatrix();
+})
 
-    /**
-     * TODO: Set up here a persistent connection with a server to receive messages
-     * currently the connection is a GET call, the browser needs to be refreshed everytime to get the information
-     * the goal is to have a real time user experience
-     */
-    setUpConnectionWithServer() {
-      const username = 'admin';
-      const password = 'admin';
+function setUpConnectionWithServer() {
+  const username = 'admin'
+  const password = 'admin'
 
-      const token = btoa(`${username}:${password}`);
+  const token = btoa(`${username}:${password}`)
 
-      axios.get('http://localhost:8085/api/message/all', {
-        headers: {
-          'Authorization': `Basic ${token}`
-        }
+  axios
+    .get('http://localhost:8085/api/message/all', {
+      headers: {
+        Authorization: `Basic ${token}`
+      }
+    })
+    .then((response ) => {
+      const messages: MessageModel[] = response.data;
+      console.log(messages);
+      messages.forEach((message: MessageModel) => {
+         handleMessage(message);
       })
-          .then((response) => {
-            const messages = response.data;
-            console.log(messages);
-            messages.forEach(message => {
-              this.handleMessage(message.message);
-            });
-          })
-          .catch((error) => {
-            console.error('Error fetching messages:', error);
-          });
-    },
+    })
+    .catch((error) => {
+      console.error('Error fetching messages:', error)
+    })
+}
 
+function handleMessage(message: MessageModel) {
+  const messageAlreadyExists = messages.find(m => m.id === message.id);
+  if(hasValue(messageAlreadyExists)) {
+    return;
+  }
+  messages.push(message);
 
+  arrayX[messages.length - 1] = Math.floor(Math.random() * 1265);
+  arrayY[messages.length - 1] = -100;
+  dY[messages.length - 1] = Math.floor(Math.random() * 7) + 3;
+}
 
-    /**
-     * Use this method to add messages to the canvas as soon they are available
-     * @param data
-     */
-    handleMessage(data) {
-      this.messages.push(
-          {
-            content: data,
-            charPosition: [],
-          });
-    },
+function setUpCanvas() {
+  if (typeof canvasObject === 'undefined' || canvasObject === null) {
+    return
+  }
+  ctx = canvasObject.getContext('2d')
 
-    setUpCanvas() {
-      this.canvas = this.$refs.canvas;
-      this.ctx = this.canvas.getContext('2d');
+  canvasObject.width = canvasObject.parentElement!.offsetWidth
+  canvasObject.height = canvasObject.parentElement!.offsetHeight
+}
 
-      this.canvas.width = this.canvas.parentElement.offsetWidth;
-      this.canvas.height = this.canvas.parentElement.offsetHeight;
+function animateMessagesLikeMatrix() {
+  if (typeof ctx === 'undefined' || ctx === null) {
+    return;
+  }
+  ctx!.clearRect(0, 0, canvasObject!.width, canvasObject!.height)
+  // ctx!.shadowBlur = 8
+  // ctx!.shadowOffsetX = ctx!.shadowOffsetY = 0
+  // ctx!.shadowColor = '#94f475'
 
-      this.ctx.font = '14px Arial';
-      this.ctx.fillStyle = '#50fa7b';
-    },
+  for (var j = 0; j < messages.length; j++) {
+    ctx!.font = '14px arial'
+    ctx!.textBaseline = 'top'
+    ctx!.textAlign = 'center'
 
-    /**
-     * TODO:
-     * This is the method with the problem, developers has tried to draw a message here that
-     * can be animated in the canvas in the same fashion as matrix.
-     */
-    animateMessagesLikeMatrix() {
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      const initialPositionInCanvas = 70;
-      const movement = 1;
-      this.messages.forEach((msg, msgIndex) => {
-        let position = msgIndex + 1;
-        //calculate a new position on the canvas for the message
-        let messagePositionX = initialPositionInCanvas
-        let messagePositionY = initialPositionInCanvas * position * movement;
+    if (arrayY[j] > 1358) {
+      arrayX[j] = Math.floor(Math.random() * canvasObject!.width)
+      arrayY[j] = -100
+      dY[j] = Math.floor(Math.random() * 7) + 3
+      drawItem(arrayX[j], arrayY[j], messages[j].message)
+    } else drawItem(arrayX[j], arrayY[j], messages[j].message.toUpperCase())
 
-        this.ctx.fillText(msg.content, messagePositionX, messagePositionY);
+    arrayY[j] += dY[j]
+  }
 
-        // Create matrix glitch effect by occasionally replace the character with a random matrix character
-        if (Math.random() < 0.1) {
-          const matrixChar = this.matrix_characters.charAt(Math.floor(Math.random() * this.matrix_characters.length));
-          this.ctx.fillText(matrixChar, messagePositionX, messagePositionY);
-        }
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      animateMessagesLikeMatrix()
+    }, 10)
+  })
+}
 
-      });
-
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          this.animateMessagesLikeMatrix();
-        }, 50);
-      });
-
-    },
-
-  },
-};
+function drawItem(x: number, y: number, item: string) {
+  if (typeof ctx === 'undefined' || ctx === null) {
+    return
+  }
+  for (var k = 0; k <= item.length; k++) {
+    var randChar = item.charAt(k)
+    if(randChar.trim() !== '' && typeof ctx!.fillText !== 'undefined') {
+      ctx!.fillStyle = colorSchema[5]
+      switch (k) {
+        case 0:
+          ctx!.fillStyle = colorSchema[0]
+          break
+        case 1:
+          ctx!.fillStyle = colorSchema[1]
+          break
+        case 3:
+          ctx!.fillStyle = colorSchema[2]
+          break
+        case 7:
+          ctx!.fillStyle = colorSchema[3]
+          break
+        case 13:
+          ctx!.fillStyle = colorSchema[4]
+          break
+        case 17:
+          ctx!.fillStyle = colorSchema[5]
+          break
+      }
+      ctx!.fillText(randChar, x, y)
+    }
+    y = y - 14
+  }
+}
 </script>

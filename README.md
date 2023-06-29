@@ -1,71 +1,46 @@
-# Matrix App
+# matrix-app
 
-This document provides setup instructions for running the matrix-app both locally without Docker and within a Docker container.
+This template should help get you started developing with Vue 3 in Vite.
 
-## Local Setup (Non-Docker)
+## Recommended IDE Setup
 
-The application requires at least Node.js version 14.0.0 or later and Vue CLI to run locally. Follow these steps to set up the local environment:
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
 
-```bash
-# For macOS:
+## Type Support for `.vue` Imports in TS
 
-# Install Node Version Manager (NVM)
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
-nvm install 16
-nvm use 16
+TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
 
-# Install Vue CLI
-npm install -g @vue/cli
+If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
 
-# Install project dependencies
+1. Disable the built-in TypeScript Extension
+    1) Run `Extensions: Show Built-in Extensions` from VSCode's command palette
+    2) Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
+2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
+
+## Customize configuration
+
+See [Vite Configuration Reference](https://vitejs.dev/config/).
+
+## Project Setup
+
+```sh
 npm install
 ```
 
-Alternatively, you can simply run the setup script to automate the above steps:
+### Compile and Hot-Reload for Development
 
-```bash
-bash setup-non-docker-local-environment.sh
+```sh
+npm run dev
 ```
 
-## Start the App
+### Type-Check, Compile and Minify for Production
 
-To start the application, use the following command:
-
-```bash
-npm run serve
+```sh
+npm run build
 ```
 
+### Lint with [ESLint](https://eslint.org/)
 
-## Docker Setup
-
-You can also run the app within a Docker container. To do this, use the following command:
-
-```bash
-bash install.sh
-```
-
-NOTE: If you are behind a proxy, you will need to set up the proxy in the Dockerfile and docker-compose.yml file.
-To do this, uncomment the following lines in the Dockerfile:
-
-```
-#ARG http_proxy
-#ARG https_proxy
-```
-
-And update the proxy values in the docker-compose.yml file:
-
-```
-build:
-  context: .
-  args:
-    - http_proxy=https://username:password@proxy-hostname:port/
-    - https_proxy=https://username:password@proxy-hostname:port/
-```
-
-## Cleanup Docker Environment
-
-If for any reason you need to clear up Docker resources associated with this app, run:
-
-```bash
-bash clean.sh
+```sh
+npm run lint
 ```
