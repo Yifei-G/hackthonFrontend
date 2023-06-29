@@ -62,11 +62,17 @@ function handleMessage(message: MessageModel) {
   }
   messages.push(message);
 
-  arrayX[messages.length - 1] = Math.floor(Math.random() * 1265);
-  arrayY[messages.length - 1] = -Math.floor(Math.random() * canvasObject!.height) - 100;
-  delay[messages.length - 1] = -(10 * Math.floor(Math.random() * 7) + 3);
-  velocity[messages.length - 1] = Math.floor(Math.random() * 7) + 3;
-  setCurrentPositionForId(getNextPositionAvailable(), message.id);
+  generateRandomPositionDataForMessage(message.id);
+}
+
+function generateRandomPositionDataForMessage(id: number) {
+  clearCurrentPosition(id);
+  setCurrentPositionForId(getNextPositionAvailable(), id);
+  const position = getCurrentPosition(id);
+  arrayX[position] = position * fontSize;
+  arrayY[position] = -Math.floor(Math.random() * canvasObject!.height) - 100;
+  delay[position] = -(10 * Math.floor(Math.random() * 7) + 3);
+  velocity[position] = Math.floor(Math.random() * 7) + 3;
 }
 
 function setUpCanvas() {
@@ -95,22 +101,18 @@ function animateMessagesLikeMatrix() {
     ctx!.textBaseline = "top";
     ctx!.textAlign = "center";
 
-    if (arrayY[j] > (canvasObject!.height * 2)) {
+      const position = getCurrentPosition(messages[j].id);
+    if (arrayY[position] > canvasObject!.height * 2) {
       // si sale fuera del cuadro
-      arrayX[j] = Math.floor(Math.random() * canvasObject!.width);
-      arrayY[j] = -Math.floor(Math.random() * canvasObject!.height) - 100;
-      velocity[j] = Math.floor(Math.random() * 7) + 3;
-      delay[messages.length - 1] = -(10 * Math.floor(Math.random() * 7) + 3);
-      drawItem(arrayX[j], arrayY[j], messages[j]);
-      arrayY[j] += delay[j];
-      // clearCurrentPosition(getCurrentPosition(messages[j].id));
-      // setCurrentPositionForId(getNextPositionAvailable(), messages[j].id);
+      generateRandomPositionDataForMessage(messages[j].id);
+      drawItem(arrayX[position], arrayY[position], messages[j]);
+      arrayY[position] += delay[position];
     } else {
       // si sigue dentro del cuadro
-      drawItem(arrayX[j], arrayY[j], messages[j]);
+      drawItem(arrayX[position], arrayY[position], messages[j]);
     }
 
-    arrayY[j] += velocity[j];
+    arrayY[position] += velocity[position];
   }
 
   requestAnimationFrame(() => {
@@ -135,7 +137,6 @@ function getCurrentPosition(id: number): number {
 }
 
 function clearCurrentPosition(id: number): boolean {
-  console.log("limpiamos para:", id);
   const positionOfId = getCurrentPosition(id);
   if (positionOfId !== -1) {
     listOfPositions[positionOfId] = -1;
