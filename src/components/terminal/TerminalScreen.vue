@@ -20,7 +20,7 @@ let arrayX = new Array();
 let arrayY = new Array();
 let velocity = new Array();
 let delay = new Array();
-let listOfPositions = [];
+let listOfPositions: any = [];
 
 onMounted(() => {
   canvasObject = canvas.value;
@@ -29,30 +29,34 @@ onMounted(() => {
   animateMessagesLikeMatrix();
 });
 
+//Task1: Make the connection persistent with Websocket...
 function setUpConnectionWithServer() {
-  const username = "admin";
-  const password = "admin";
 
-  const token = btoa(`${username}:${password}`);
+  let socket = new WebSocket ("ws://172.17.254.23:8085/api/topic/message");
 
-  axios
-    .get("http://localhost:8085/api/message/all", {
-      headers: {
-        Authorization: `Basic ${token}`,
-      },
-    })
-    .then((response) => {
-      const messages: MessageModel[] = response.data;
-      messages.forEach((message: MessageModel) => {
-        handleMessage(message);
-      });
-    })
-    .catch((error) => {
-      console.error("Error fetching messages:", error);
-    })
-    .finally(() => {
-      console.log(listOfPositions);
-    });
+  socket.onopen = () => {
+    console.log("[open] Connection established");
+    console.log("Sending to server");
+    socket.send("Opening websocket for hackthon");
+  }
+
+  socket.onmessage = function(event) {
+    console.log(`[message] Data received from server: ${event.data}`);
+  };
+
+  socket.onclose = function(event) {
+    if (event.wasClean) {
+      console.log(`[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
+    } else {
+      // e.g. server process killed or network down
+      // event.code is usually 1006 in this case
+      console.log('[close] Connection died');
+    }
+  };
+
+  socket.onerror = function(error) {
+    console.log(error);
+  };
 }
 
 function handleMessage(message: MessageModel) {
