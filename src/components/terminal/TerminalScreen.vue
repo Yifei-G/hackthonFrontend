@@ -20,7 +20,7 @@ let arrayX = new Array();
 let arrayY = new Array();
 let velocity = new Array();
 let delay = new Array();
-let listOfPositions = [];
+let listOfPositions: any = [];
 
 onMounted(() => {
   canvasObject = canvas.value;
