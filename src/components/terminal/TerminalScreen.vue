@@ -93,28 +93,34 @@ onMounted(() => {
   animateMessagesLikeMatrix();
 })
 
+//Task1: Make the connection persistent with Websocket...
 function setUpConnectionWithServer() {
-  const username = 'admin'
-  const password = 'admin'
 
-  const token = btoa(`${username}:${password}`)
+  let socket = new WebSocket ("ws://localhost:8085/api/topic/matrix-message");
 
-  axios
-    .get('http://localhost:8085/api/message/all', {
-      headers: {
-        Authorization: `Basic ${token}`
-      }
-    })
-    .then((response ) => {
-      const messages: MessageModel[] = response.data;
-      console.log(messages);
-      messages.forEach((message: MessageModel) => {
-         handleMessage(message);
-      })
-    })
-    .catch((error) => {
-      console.error('Error fetching messages:', error)
-    })
+  socket.onopen = () => {
+    console.log("[open] Connection established");
+    console.log("Sending to server");
+    socket.send("Opening websocket for hackthon");
+  }
+
+  socket.onmessage = function(event) {
+    console.log(`[message] Data received from server: ${event.data}`);
+  };
+
+  socket.onclose = function(event) {
+    if (event.wasClean) {
+      alert(`[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
+    } else {
+      // e.g. server process killed or network down
+      // event.code is usually 1006 in this case
+      alert('[close] Connection died');
+    }
+  };
+
+  socket.onerror = function(error) {
+    alert(`[error]`);
+  };
 }
 
 function handleMessage(message: MessageModel) {
