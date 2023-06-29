@@ -96,7 +96,7 @@ onMounted(() => {
 //Task1: Make the connection persistent with Websocket...
 function setUpConnectionWithServer() {
 
-  let socket = new WebSocket ("ws://localhost:8085/api/topic/matrix-message");
+  let socket = new WebSocket ("ws://172.17.254.23:8085/api/topic/message");
 
   socket.onopen = () => {
     console.log("[open] Connection established");
@@ -110,11 +110,11 @@ function setUpConnectionWithServer() {
 
   socket.onclose = function(event) {
     if (event.wasClean) {
-      alert(`[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
+      console.log(`[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
     } else {
       // e.g. server process killed or network down
       // event.code is usually 1006 in this case
-      alert('[close] Connection died');
+      console.log('[close] Connection died');
     }
   };
 
