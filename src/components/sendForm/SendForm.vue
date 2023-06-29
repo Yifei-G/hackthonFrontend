@@ -1,6 +1,6 @@
 <template>
     <form class="form" @submit.prevent="handleSubmit">
-        <input class="input" type="text" :v-model="message">
+        <input class="input" type="text" v-model="message">
         <button class="button">Send</button>
     </form>
 </template>
@@ -19,11 +19,17 @@ const handleSubmit = async () => {
     headers.set("Authorization", `Basic ${btoa("admin:admin")}`);
     headers.set("Content-Type", "application/json");
 
-    await fetch(POST_ENDPOINT, {
+    try {
+      await fetch(POST_ENDPOINT, {
         method: "POST",
         headers,
         body: JSON.stringify({ message: message.value }),
-    })
+      });
+      message.value = "";
+    } catch (error) {
+      console.log(error);
+      message.value = "";
+    }
 }
 </script>
 

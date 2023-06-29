@@ -32,7 +32,7 @@ onMounted(() => {
 //Task1: Make the connection persistent with Websocket...
 function setUpConnectionWithServer() {
 
-  let socket = new WebSocket ("ws://172.17.254.23:8085/api/topic/message");
+  let socket = new WebSocket ("ws://172.17.254.23:8085/api/topic");
 
   socket.onopen = () => {
     console.log("[open] Connection established");
